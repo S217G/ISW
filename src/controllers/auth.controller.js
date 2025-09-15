@@ -26,11 +26,11 @@ export async function register(req, res) {
     }
     
     const newUser = await createUser(data);
-    delete newUser.password; // Nunca devolver la contraseña
+    delete newUser.password;
     handleSuccess(res, 201, "Usuario registrado exitosamente", newUser);
   } catch (error) {
-    if (error.code === '23505') { // Código de error de PostgreSQL para violación de unique constraint
-      handleErrorClient(res, 409, "El email ya está registrado");
+    if (error.code) { 
+      handleErrorClient(res, 409, "El email ya esta registrado");
     } else {
       handleErrorServer(res, 500, "Error interno del servidor", error.message);
     }
