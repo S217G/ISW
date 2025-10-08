@@ -3,7 +3,7 @@ import {
   updateUser, 
   deleteUser, 
  } from "../services/user.service.js";
-import { updateUserValidation } from "../../validations/user.validation.js";
+import { updateUserValidation } from "../validations/user.validation.js";
 
 export function getPublicProfile(req, res) {
   handleSuccess(res, 200, "Perfil público obtenido exitosamente", {
