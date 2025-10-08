@@ -1,5 +1,9 @@
 import { handleSuccess, handleErrorServer, handleErrorClient } from "../Handlers/responseHandlers.js";
-import { updateUser, deleteUser, findUserById } from "../services/user.service.js";
+import { 
+  updateUser, 
+  deleteUser, 
+ } from "../services/user.service.js";
+import { updateUserValidation } from "../../validations/user.validation.js";
 
 export function getPublicProfile(req, res) {
   handleSuccess(res, 200, "Perfil público obtenido exitosamente", {
@@ -18,24 +22,14 @@ export function getPrivateProfile(req, res) {
 
 export async function updatePrivateProfile(req, res) {
   try {
-    const userId = req.user.id;
-    const { email, password } = req.body;
-
+    const { error, value } = updateUserValidation.validate(req.body);
     
-    if (!email && !password) {
-      return handleErrorClient(res, 400, "Debe proporcionar al menos un campo para actualizar (email o password)");
+    if (error) {
+      return handleErrorClient(res, 400, "Error en los datos enviados", error.details[0].message);
     }
 
-    if (email) {
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return handleErrorClient(res, 400, "El formato del email no es valido");
-      }
-    }
-
-    if (password && password.length < 6) {
-      return handleErrorClient(res, 400, "La contraseña debe tener al menos 6 caracteres");
-    }
+    const userId = req.user.id;
+    const { email, password } = value;
 
     const updatedUser = await updateUser(userId, { email, password });
 
@@ -48,9 +42,6 @@ export async function updatePrivateProfile(req, res) {
   } catch (error) {
     if (error.message === "Usuario no encontrado") {
       return handleErrorClient(res, 404, "Usuario no encontrado");
-    }
-    if (error.message === "El email ya esta en uso por otro usuario") {
-      return handleErrorClient(res, 409, "El email ya esta en uso por otro usuario");
     }
     handleErrorServer(res, 500, "Error interno del servidor", error.message);
   }
